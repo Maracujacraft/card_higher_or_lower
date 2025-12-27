@@ -1,10 +1,6 @@
-#include <algorithm>
-#include <cstddef>
-#include <cstdlib>
+#include <cmath>
 #include <iostream>
 #include <random>
-#include <map>
-#include <ratio>
 #include <string>
 
 int random_between(int min, int max) {
@@ -14,7 +10,7 @@ int random_between(int min, int max) {
     return dist(gen);
 }
 
-static std::string draw_card(int num, bool guess_correct = false)
+static std::string draw_card(int num, int score = NAN, bool guess_correct = false)
 {
     std::string n = std::to_string(num);
 
@@ -23,16 +19,18 @@ static std::string draw_card(int num, bool guess_correct = false)
     int right = padding - left;
 
     std::string gstr;
-    std::string h_or_l = "Will the next card be higher (\"h\") or lower? (\"l\")";
+    std::string h_or_l = "   Will the next card be higher (\"h\") or lower? (\"l\")";
+    std::string curscore;
     if (guess_correct){
         gstr   = "   You have guessed correctly.";
+        curscore = "   Current Score: " + std::to_string(score);
     }
 
     std::string card;
     card += "┌───────┐\n";
     card += "│       │" + gstr + '\n';
-    card += "│ " + std::string(left, ' ') + n + std::string(right, ' ') + " │   " + h_or_l +'\n';
-    card += "│       │\n";
+    card += "│ " + std::string(left, ' ') + n + std::string(right, ' ') + " │" + h_or_l +'\n';
+    card += "│       │"+curscore+'\n';
     card += "└───────┘\n";
 
     return card;
@@ -41,6 +39,7 @@ static std::string draw_card(int num, bool guess_correct = false)
 void game(int min=1, int max=100){
     int cur = min;
     int next = random_between(min, max);
+    int score = -1;
     bool is_alive = true;
     char choice;
     std::cout << draw_card(cur);
@@ -56,17 +55,18 @@ void game(int min=1, int max=100){
         std::cout << " firstpart " << firstpart << " secondpart:" << secondpart*/;
 
         if ((choice == 'h' && next > cur) || (choice == 'l' && next < cur)){
+            score++;
             cur = next;
 
             do {
                 next = random_between(min, max);
             } while (cur == next);
 
-            std::cout << "\n\n\n\n\n" << draw_card(cur, true);
+            std::cout << "\n\n\n\n\n" << draw_card(cur, score,true);
             std::cin >> choice;
         }
         else {
-            std::cout << "\nUnfortunately you've guessed wrong, and lost the game. The next number was " << next << ' ';
+            std::cout << "\nUnfortunately you've guessed wrong, and lost the game. The next number was " << next << '\n' << "Your score was: " << score << '\n';
             is_alive=false;
         }
     }
